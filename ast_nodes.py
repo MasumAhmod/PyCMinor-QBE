@@ -3,288 +3,264 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 
-# ==========================================
-# 1. BASE AST NODE
-# ==========================================
-
+# Base class for all AST nodes
 @dataclass
 class ASTNode:
-    """Base class for all AST nodes."""
     pass
 
 
-# ==========================================
-# 2. PROGRAM AND FUNCTION NODES
-# ==========================================
-
-@dataclass
-class Program(ASTNode):
-    """Represents the complete CMinor program."""
-    declarations: List[ASTNode] = field(default_factory=list)
-
-
-@dataclass
-class Function(ASTNode):
-    """Represents a function declaration."""
-    return_type: str
-    name: str
-    parameters: List[ASTNode] = field(default_factory=list)
-    body: Optional[ASTNode] = None
-
-
+# Function parameter
 @dataclass
 class Parameter(ASTNode):
-    """Represents a function parameter."""
     param_type: str
     name: str
 
 
-# ==========================================
-# 3. VARIABLE DECLARATION
-# ==========================================
+# Complete program
+@dataclass
+class Program(ASTNode):
+    declarations: List[ASTNode] = field(default_factory=list)
 
+
+# Function declaration
+@dataclass
+class Function(ASTNode):
+    return_type: str
+    name: str
+    parameters: List[Parameter] = field(default_factory=list)
+    body: Optional[ASTNode] = None
+
+
+# Variable declaration
 @dataclass
 class VariableDeclaration(ASTNode):
-    """Represents a variable declaration."""
     var_type: str
     name: str
     initializer: Optional[ASTNode] = None
 
 
-# ==========================================
-# 4. STATEMENT NODES
-# ==========================================
-
-@dataclass
-class Block(ASTNode):
-    """Represents a block of statements."""
-    statements: List[ASTNode] = field(default_factory=list)
-
-
-@dataclass
-class ExpressionStatement(ASTNode):
-    """Represents an expression followed by a semicolon."""
-    expression: Optional[ASTNode] = None
-
-
-@dataclass
-class ReturnStatement(ASTNode):
-    """Represents a return statement."""
-    expression: Optional[ASTNode] = None
-
-
-@dataclass
-class IfStatement(ASTNode):
-    """Represents an if-else statement."""
-    condition: ASTNode
-    then_branch: ASTNode
-    else_branch: Optional[ASTNode] = None
-
-
-@dataclass
-class WhileStatement(ASTNode):
-    """Represents a while loop."""
-    condition: ASTNode
-    body: ASTNode
-
-
-# ==========================================
-# 5. EXPRESSION NODES
-# ==========================================
-
-@dataclass
-class BinaryExpression(ASTNode):
-    """Represents binary operations like a + b."""
-    left: ASTNode
-    operator: str
-    right: ASTNode
-
-
-@dataclass
-class UnaryExpression(ASTNode):
-    """Represents unary operations like -a or !a."""
-    operator: str
-    operand: ASTNode
-
-
-@dataclass
-class AssignmentExpression(ASTNode):
-    """Represents assignments like x = 10."""
-    target: ASTNode
-    value: ASTNode
-
-
-@dataclass
-class VariableExpression(ASTNode):
-    """Represents a variable reference."""
-    name: str
-
-
-@dataclass
-class IntegerLiteral(ASTNode):
-    """Represents an integer constant."""
-    value: int
-
-
-@dataclass
-class CallExpression(ASTNode):
-    """Represents function calls like add(a, b)."""
-    function_name: str
-    arguments: List[ASTNode] = field(default_factory=list)
-
-
-# ==========================================
-# 6. ARRAY NODES
-# ==========================================
-
+# Array declaration
 @dataclass
 class ArrayDeclaration(ASTNode):
-    """Represents an array declaration."""
     element_type: str
     name: str
     size: Optional[int] = None
 
 
+# Array access
 @dataclass
 class ArrayAccess(ASTNode):
-    """Represents array access like arr[0]."""
     array_name: str
     index: ASTNode
 
 
-# ==========================================
-# 7. BOOLEAN LITERAL
-# ==========================================
+# Block of statements
+@dataclass
+class Block(ASTNode):
+    statements: List[ASTNode] = field(default_factory=list)
 
+
+# Expression statement
+@dataclass
+class ExpressionStatement(ASTNode):
+    expression: Optional[ASTNode] = None
+
+
+# Return statement
+@dataclass
+class ReturnStatement(ASTNode):
+    expression: Optional[ASTNode] = None
+
+
+# If-else statement
+@dataclass
+class IfStatement(ASTNode):
+    condition: ASTNode
+    then_branch: ASTNode
+    else_branch: Optional[ASTNode] = None
+
+
+# While loop
+@dataclass
+class WhileStatement(ASTNode):
+    condition: ASTNode
+    body: ASTNode
+
+
+# Binary expression: a + b, a > b, etc.
+@dataclass
+class BinaryExpression(ASTNode):
+    left: ASTNode
+    operator: str
+    right: ASTNode
+
+
+# Unary expression: -a, !a, etc.
+@dataclass
+class UnaryExpression(ASTNode):
+    operator: str
+    operand: ASTNode
+
+
+# Assignment expression: a = 10
+@dataclass
+class AssignmentExpression(ASTNode):
+    target: ASTNode
+    value: ASTNode
+
+
+# Variable reference
+@dataclass
+class VariableExpression(ASTNode):
+    name: str
+
+
+# Integer literal
+@dataclass
+class IntegerLiteral(ASTNode):
+    value: int
+
+
+# Boolean literal
 @dataclass
 class BooleanLiteral(ASTNode):
-    """Represents true or false."""
     value: bool
 
 
-# ==========================================
-# 8. AST DISPLAY FUNCTION
-# ==========================================
+# Function call
+@dataclass
+class CallExpression(ASTNode):
+    function_name: str
+    arguments: List[ASTNode] = field(default_factory=list)
 
-def print_ast(node: Optional[ASTNode], indent: int = 0):
-    """Prints the AST in a readable tree format."""
 
-    # Handle None safely
+# Print AST in a readable tree format
+def print_ast(node: Optional[ASTNode], indent: int = 0) -> None:
+
     if node is None:
+        print(" " * indent + "None")
         return
 
     prefix = " " * indent
 
-    # Program
     if isinstance(node, Program):
         print(prefix + "Program")
-
         for declaration in node.declarations:
             print_ast(declaration, indent + 2)
 
-    # Function
     elif isinstance(node, Function):
-        print(prefix + f"Function: {node.name} -> {node.return_type}")
+        print(prefix + f"Function: {node.return_type} {node.name}")
+        print(prefix + "  Parameters:")
+        for parameter in node.parameters:
+            print_ast(parameter, indent + 4)
+        print(prefix + "  Body:")
+        print_ast(node.body, indent + 4)
 
-        for param in node.parameters:
-            print_ast(param, indent + 2)
-
-        if node.body is not None:
-            print_ast(node.body, indent + 2)
-
-    # Parameter
     elif isinstance(node, Parameter):
         print(prefix + f"Parameter: {node.param_type} {node.name}")
 
-    # Variable Declaration
     elif isinstance(node, VariableDeclaration):
-        print(prefix + f"Variable: {node.var_type} {node.name}")
-
+        print(prefix + f"VariableDeclaration: {node.var_type} {node.name}")
         if node.initializer is not None:
-            print_ast(node.initializer, indent + 2)
+            print(prefix + "  Initializer:")
+            print_ast(node.initializer, indent + 4)
 
-    # Block
+    elif isinstance(node, ArrayDeclaration):
+        print(prefix + f"ArrayDeclaration: {node.element_type} {node.name}[{node.size}]")
+
+    elif isinstance(node, ArrayAccess):
+        print(prefix + f"ArrayAccess: {node.array_name}")
+        print(prefix + "  Index:")
+        print_ast(node.index, indent + 4)
+
     elif isinstance(node, Block):
         print(prefix + "Block")
-
         for statement in node.statements:
             print_ast(statement, indent + 2)
 
-    # Return Statement
-    elif isinstance(node, ReturnStatement):
-        print(prefix + "Return")
-
-        if node.expression is not None:
-            print_ast(node.expression, indent + 2)
-
-    # If Statement
-    elif isinstance(node, IfStatement):
-        print(prefix + "If")
-        print_ast(node.condition, indent + 2)
-
-        print(prefix + "Then")
-        print_ast(node.then_branch, indent + 2)
-
-        if node.else_branch is not None:
-            print(prefix + "Else")
-            print_ast(node.else_branch, indent + 2)
-
-    # While Statement
-    elif isinstance(node, WhileStatement):
-        print(prefix + "While")
-        print_ast(node.condition, indent + 2)
-        print_ast(node.body, indent + 2)
-
-    # Expression Statement
     elif isinstance(node, ExpressionStatement):
         print(prefix + "ExpressionStatement")
         print_ast(node.expression, indent + 2)
 
-    # Binary Expression
+    elif isinstance(node, ReturnStatement):
+        print(prefix + "ReturnStatement")
+        print_ast(node.expression, indent + 2)
+
+    elif isinstance(node, IfStatement):
+        print(prefix + "IfStatement")
+        print(prefix + "  Condition:")
+        print_ast(node.condition, indent + 4)
+        print(prefix + "  Then:")
+        print_ast(node.then_branch, indent + 4)
+
+        if node.else_branch is not None:
+            print(prefix + "  Else:")
+            print_ast(node.else_branch, indent + 4)
+
+    elif isinstance(node, WhileStatement):
+        print(prefix + "WhileStatement")
+        print(prefix + "  Condition:")
+        print_ast(node.condition, indent + 4)
+        print(prefix + "  Body:")
+        print_ast(node.body, indent + 4)
+
     elif isinstance(node, BinaryExpression):
         print(prefix + f"BinaryExpression: {node.operator}")
         print_ast(node.left, indent + 2)
         print_ast(node.right, indent + 2)
 
-    # Unary Expression
     elif isinstance(node, UnaryExpression):
         print(prefix + f"UnaryExpression: {node.operator}")
         print_ast(node.operand, indent + 2)
 
-    # Assignment Expression
     elif isinstance(node, AssignmentExpression):
-        print(prefix + "Assignment")
-        print_ast(node.target, indent + 2)
-        print_ast(node.value, indent + 2)
+        print(prefix + "AssignmentExpression")
+        print(prefix + "  Target:")
+        print_ast(node.target, indent + 4)
+        print(prefix + "  Value:")
+        print_ast(node.value, indent + 4)
 
-    # Variable Expression
     elif isinstance(node, VariableExpression):
-        print(prefix + f"VariableReference: {node.name}")
+        print(prefix + f"VariableExpression: {node.name}")
 
-    # Integer Literal
     elif isinstance(node, IntegerLiteral):
         print(prefix + f"IntegerLiteral: {node.value}")
 
-    # Boolean Literal
     elif isinstance(node, BooleanLiteral):
         print(prefix + f"BooleanLiteral: {node.value}")
 
-    # Function Call
     elif isinstance(node, CallExpression):
-        print(prefix + f"FunctionCall: {node.function_name}")
-
+        print(prefix + f"CallExpression: {node.function_name}")
         for argument in node.arguments:
             print_ast(argument, indent + 2)
 
-    # Array Declaration
-    elif isinstance(node, ArrayDeclaration):
-        print(prefix + f"Array: {node.element_type} {node.name}[{node.size}]")
-
-    # Array Access
-    elif isinstance(node, ArrayAccess):
-        print(prefix + f"ArrayAccess: {node.array_name}")
-        print_ast(node.index, indent + 2)
-
-    # Unknown Node
     else:
-        print(prefix + f"Unknown Node: {type(node).__name__}")
+        print(prefix + f"Unknown AST Node: {node}")
+
+
+# Simple manual test
+if __name__ == "__main__":
+
+    program = Program(
+        declarations=[
+            Function(
+                return_type="int",
+                name="main",
+                parameters=[],
+                body=Block(
+                    statements=[
+                        VariableDeclaration(
+                            var_type="int",
+                            name="x",
+                            initializer=IntegerLiteral(10)
+                        ),
+                        ReturnStatement(
+                            expression=VariableExpression("x")
+                        )
+                    ]
+                )
+            )
+        ]
+    )
+
+    print_ast(program)
